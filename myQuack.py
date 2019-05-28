@@ -429,8 +429,68 @@ if __name__ == "__main__":
         print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
         return nn_optimal
     
-    optimal_num_of_neighbours_NNC()
+    #optimal_num_of_neighbours_NNC()
+    
+    def optimal_num_of_neurons_NeuralNetwork_C():
+        neurons=np.linspace(10, 40, 30)
+        neurons=neurons.astype(int)
+        cross_Vals=[]
+        from sklearn.neural_network import MLPClassifier
+        for i in neurons:
+            hidden_layers=[i,i,i]  # define the layers/depth of the NN
+            mlp = MLPClassifier(hidden_layer_sizes=hidden_layers, verbose=True)
+            mlp.fit(X_training, y_training)  # fit features over NN
+            
+            #Obtain cross_val_score for K Nearest Neighbours classifier with n_neighbors=i
+            crossvals=cross_val_score(mlp, X_training, y_training, cv=5,scoring='accuracy')
+            #Appending the mean score to the scores list
+            cross_Vals.append(crossvals.mean())
+            
+        #Plotting the the mean cross valuation score as tree depth changes
+        line5,= plt.plot(neurons,cross_Vals,'c',label='Mean Cross Val Score')
+        plt.legend(handler_map={line5: HandlerLine2D(numpoints=1)})
+        plt.ylabel('Cross Validated Accuracy Score')
+        plt.xlabel('Number of Neurons')
+        plt.show()
+        ##### NEED TO CREATE OPTIMAL MODEL#####
+    
+        
+    #optimal_num_of_neurons_NeuralNetwork_C()
+    
+    def optimal_Cparam_SVM():
+        C_list=[0.01,0.1,1,10]
+        cross_Vals=[]
+        from sklearn import svm
+        for i in C_list:
+            clf = svm.SVC(C=i,gamma='scale')
+            clf.fit(X_training, y_training)  # fit features over NN
+            
+             #Obtain cross_val_score for K Nearest Neighbours classifier with n_neighbors=i
+            crossvals=cross_val_score(clf, X_training, y_training, cv=5,scoring='accuracy')
+            #Appending the mean score to the scores list
+            cross_Vals.append(crossvals.mean())
+            
+        #Plotting the the mean cross valuation score as tree depth changes
+        line5,= plt.plot(C_list,cross_Vals,'c',label='Mean Cross Val Score')
+        plt.legend(handler_map={line5: HandlerLine2D(numpoints=1)})
+        plt.ylabel('Cross Validated Accuracy Score')
+        plt.xlabel('C')
+        plt.show()
+            ##### NEED TO CREATE OPTIMAL MODEL#####
+        #We decicde that the optimal hyper parameter for this instance is n_neighbors=8
+        #Creating the classifier with above said hyper parameter
+        svm_optimal = svm.SVC(C=10,gamma='scale')
+        #Building the classifier from the training data sets
+        svm_optimal.fit(X_training,y_training)
+        #should I use X_test or X_validation?????
+        #Predicting the class for X
+        y_pred_optimal=svm_optimal.predict(X_validation)
+        #Computing the accuracy score by comparing the predicted set
+        #with the validation set
+        print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
 
+    optimal_Cparam_SVM()
+            
 
         
             
