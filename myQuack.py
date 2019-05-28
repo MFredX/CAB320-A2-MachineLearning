@@ -317,15 +317,15 @@ if __name__ == "__main__":
         "number of neighbours" hyper-parameter have been obtained for a 
         K Nearest Neighbours Classifier.
         The plotted graphs are;
-        NN vs AUC score
-        NN vs Mean Accuracy score
-        NN vs Cross Validated Accuracy Score
+        Number of Neighbours vs AUC score
+        Number of Neighbours vs Mean Accuracy score
+        Number of Neighbours vs Cross Validated Accuracy Score
         
         @param 
         none
     
         @return
-        	clf 
+        	nn- a K Nearest Neighbours Classifier with optimal Number of Neighbours
         '''
         
         #Tuning the number of neighbours hyper-parameter for the K Nearest Neighbours Classifier
