@@ -335,8 +335,8 @@ if __name__ == "__main__":
         
         #Creating an array of max_depths to loop through to find
         #optimal hyper parameter
-        max_neighbours = np.linspace(1, 30, 30)
-        print("Yooo")
+        max_neighbours=np.linspace(1, 30, 30)
+        max_neighbours=max_neighbours.astype(int)
         training_results = []
         testing_results = []
         testing_meanScoreresults = []
@@ -390,45 +390,44 @@ if __name__ == "__main__":
             crossvals=cross_val_score(nn, X_training, y_training, cv=5,scoring='accuracy')
             #Appending the mean score to the scores list
             cross_Vals.append(crossvals.mean())
+            
+            
+        #Plotting the the respective areas under the curve
+        line1, = plt.plot(max_neighbours, training_results, 'b', label='Train AUC')
+        line2, = plt.plot(max_neighbours, testing_results, 'r', label='Test AUC')
+        plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+        plt.ylabel('Score')
+        plt.xlabel('Number of Neighbours')
+        plt.show()
 
-            #Plotting the the respective areas under the curve
-            line1, = plt.plot(max_neighbours, training_results, 'b', label='Train AUC')
-            line2, = plt.plot(max_neighbours, testing_results, 'r', label='Test AUC')
-            plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
-            plt.ylabel('Score')
-            plt.xlabel('Number of Neighbours')
-            plt.show()
-
-            #Plotting the the respective mean score results
-            line3, = plt.plot(max_neighbours, testing_meanScoreresults, 'g', label='Testing Mean Score Results')
-            line4, = plt.plot(max_neighbours, training_meanScoreresults, 'y', label='Training Mean Score Results')
-            plt.legend(handler_map={line3: HandlerLine2D(numpoints=2)})
-            plt.ylabel('Mean Accuracy Score')
-            plt.xlabel('Number of Neighbours')
-            plt.show()
-        
-            #Plotting the the mean cross valuation score as tree depth changes
-            line5,= plt.plot(max_neighbours,cross_Vals,'c',label='Mean Cross Val Score')
-            plt.legend(handler_map={line5: HandlerLine2D(numpoints=1)})
-            plt.ylabel('Cross Validated Accuracy Score')
-            plt.xlabel('Number of Neighbours')
-            plt.show()
+        #Plotting the the respective mean score results
+        line3, = plt.plot(max_neighbours, testing_meanScoreresults, 'g', label='Testing Mean Score Results')
+        line4, = plt.plot(max_neighbours, training_meanScoreresults, 'y', label='Training Mean Score Results')
+        plt.legend(handler_map={line3: HandlerLine2D(numpoints=2)})
+        plt.ylabel('Mean Accuracy Score')
+        plt.xlabel('Number of Neighbours')
+        plt.show()
+    
+        #Plotting the the mean cross valuation score as tree depth changes
+        line5,= plt.plot(max_neighbours,cross_Vals,'c',label='Mean Cross Val Score')
+        plt.legend(handler_map={line5: HandlerLine2D(numpoints=1)})
+        plt.ylabel('Cross Validated Accuracy Score')
+        plt.xlabel('Number of Neighbours')
+        plt.show()
             
         
-            #We decicde that the optimal hyper parameter for this instance is max_depth=5
-# =============================================================================
-#             #Creating the classifier with above said hyper parameter
-#             nn_optimal = KNeighborsClassifier(max_depth=5)
-#             #Building the classifier from the training data sets
-#             nn_optimal.fit(X_training,y_training)
-#             #should I use X_test or X_validation?????
-#             #Predicting the class for X
-#             y_pred_optimal=nn_optimal.predict(X_validation)
-#             #Computing the accuracy score by comparing the predicted set
-#             #with the validation set
-#             print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
-#             return nn_optimal
-# =============================================================================
+        #We decicde that the optimal hyper parameter for this instance is n_neighbors=8
+        #Creating the classifier with above said hyper parameter
+        nn_optimal = KNeighborsClassifier(n_neighbors=8)
+        #Building the classifier from the training data sets
+        nn_optimal.fit(X_training,y_training)
+        #should I use X_test or X_validation?????
+        #Predicting the class for X
+        y_pred_optimal=nn_optimal.predict(X_validation)
+        #Computing the accuracy score by comparing the predicted set
+        #with the validation set
+        print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
+        return nn_optimal
     
     optimal_num_of_neighbours_NNC()
 
