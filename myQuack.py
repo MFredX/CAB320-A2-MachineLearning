@@ -171,12 +171,12 @@ if __name__ == "__main__":
     ratio_train, ratio_test = 0.8 , 0.2
     
     #Creating the training data set 80% of the data
-    X_training, X_testandVal, y_training, y_testandVal = train_test_split(X, y, train_size=ratio_train,test_size=ratio_test, shuffle=False)
+    X_training, X_testandVal, y_training, y_testandVal = train_test_split(X, y, train_size=ratio_train,test_size=ratio_test, shuffle=True,random_state=7654)
     
     #The validation and testing sets are created 
     #from th remaining 20% by splitting that in to two 10% parts
     test_ratio=0.5
-    X_validation,X_test,y_validation,y_test=train_test_split(X_testandVal,y_testandVal,test_size=test_ratio,shuffle=False)
+    X_validation,X_test,y_validation,y_test=train_test_split(X_testandVal,y_testandVal,test_size=test_ratio,shuffle=True,random_state=7654)
     
     def optimal_Max_branch_DT():
         '''  
@@ -309,7 +309,7 @@ if __name__ == "__main__":
         print ("Accuracy is", accuracy_score(y_validation,y_pred_optimal)*100)
         return dt_optimal
     
-    #optimal_Max_branch_DT()
+    optimal_Max_branch_DT()
     
     def optimal_num_of_neighbours_NNC():
         '''  
@@ -489,7 +489,13 @@ if __name__ == "__main__":
         #with the validation set
         print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
 
-    optimal_Cparam_SVM()
+    #optimal_Cparam_SVM()
+    
+    
+    #### SCALING??????
+    #### CROSS VALIDATION DONE RIGHT?
+    #### IS AUC REALLY NECCESSARY?
+    #### 
             
 
         
