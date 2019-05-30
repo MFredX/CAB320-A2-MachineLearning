@@ -27,6 +27,7 @@ from matplotlib.legend_handler import HandlerLine2D
 from sklearn.metrics import accuracy_score
 import statistics
 from scipy import stats
+from sklearn import svm
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -189,7 +190,7 @@ if __name__ == "__main__":
         #List to store optimal max_depth values of tests
         optimal_depths=[]
         #max_depth of the model is found 30 times
-        for j in range(0,31):
+        for j in range(0,30):
             #Iterating through max_depths array to find the optimal value of max_depth
             cross_Vals=[]
             for i in max_depths:
@@ -208,6 +209,7 @@ if __name__ == "__main__":
             #Retriving the optimal_depth value by indexing the above index found above
             #on max_depths 
             optimal_depth=max_depths[result]
+            #print(result)
             
             #Creating the classifier with above said hyper parameter
             dt_optimal = DecisionTreeClassifier(max_depth=optimal_depth[0])
@@ -247,7 +249,7 @@ if __name__ == "__main__":
         
         return dt_final;
 
-    #optimal_Max_depth_DT()
+    
     
     
     def optimal_num_of_neighbours_NNC():
@@ -270,28 +272,30 @@ if __name__ == "__main__":
         #List to store optimal max_neighbours values of tests
         optimal_ns=[]
         #max_depth of the model is found 30 times
-        for j in range(0,31):
+        for j in range(0,30):
             #Iterating through max_depths array to find the optimal value of max_neighbours
+            #List to store results from cross validation
             cross_Vals=[]
             for i in max_neighbours:
                 nn = KNeighborsClassifier(n_neighbors=i)
+                #print(i)
                 #Building the classifier from the training data sets
                 nn.fit(X_training, y_training)
                 #Obtain cross_val_score for DecisionTree classifier with max_depth=i
                 crossvals=cross_val_score(nn, X_training, y_training, cv=5,scoring='accuracy')
                 #Appending the mean score to the scores list
                 cross_Vals.append(crossvals.mean())
+                #print(crossvals.mean())
     
             #Finding highest Cross Validated Accuracy Score
             maxCVAS = np.amax(cross_Vals)
             #Finding relevant index where the highest Cross Validated Score is present
             result = np.where(cross_Vals == np.amax(cross_Vals))
             #Retriving the optimal_depth value by indexing the above index found above
-            #on max_depths 
+            #on max_neighbours 
             optimal_n=max_neighbours[result]
             
-           
-            #We decicde that the optimal hyper parameter for this instance is max_neighbours
+    
             #Creating the classifier with above said hyper parameter
             nn_optimal = KNeighborsClassifier(n_neighbors=optimal_n[0])
             #Building the classifier from the training data sets
@@ -299,12 +303,11 @@ if __name__ == "__main__":
             #optimal_crossvals=cross_val_score(dt_optimal, X_training, y_training, cv=5,scoring='accuracy')
             #Predicting the class for X
             y_pred_optimal=nn_optimal.predict(X_test) 
-            #Computing the accuracy score by comparing the predicted set
-            #with the validation set
-            print('This is test number:',(j+1))
+            print('This is test model number:',(j+1))
             print('The maximum value of CVAS of this test is is:',maxCVAS)
             print('Optimal Depth of this test is:',optimal_n[0])
             #print('Optimal Cross Val of this is:',(optimal_crossvals.mean()))
+            #Finding accuracy
             print ("Accuracy is", accuracy_score(y_test,y_pred_optimal)*100)
             print('----------------------------------------------')
             
@@ -313,11 +316,10 @@ if __name__ == "__main__":
         
         print("Evaluvating the optimized model")
         print(optimal_ns)
-        #print("The mean of the optimal_depths list is:",statistics.mean(optimal_depths))
         #The max_depth that was most frequent in our tests was selected as the final
         # value of max depth
         mode_optimal_ns=stats.mode(optimal_ns)[0][0]
-        print("The mode of the optimal_depths list is",mode_optimal_ns)
+        print("The mode of the n_neighbors list is",mode_optimal_ns)
         #Final classifier will be made with the depth that was found to be optimal in most 
         # of our tests
         nn_final = KNeighborsClassifier(n_neighbors=mode_optimal_ns)
@@ -330,76 +332,147 @@ if __name__ == "__main__":
         
         return nn_final;
         
-        
-        
     
-    optimal_num_of_neighbours_NNC()
     
     def optimal_num_of_neurons_NeuralNetwork_C():
-        neurons=np.linspace(10, 40, 30)
-        neurons=neurons.astype(int)
-        cross_Vals=[]
-        from sklearn.neural_network import MLPClassifier
-        for i in neurons:
-            hidden_layers=[i,i,i]  # define the layers/depth of the NN
-            mlp = MLPClassifier(hidden_layer_sizes=hidden_layers, verbose=True)
-            mlp.fit(X_training, y_training)  # fit features over NN
-            
-            #Obtain cross_val_score for K Nearest Neighbours classifier with n_neighbors=i
-            crossvals=cross_val_score(mlp, X_training, y_training, cv=5,scoring='accuracy')
-            #Appending the mean score to the scores list
-            cross_Vals.append(crossvals.mean())
-            
-        #Plotting the the mean cross valuation score as tree depth changes
-        line5,= plt.plot(neurons,cross_Vals,'c',label='Mean Cross Val Score')
-        plt.legend(handler_map={line5: HandlerLine2D(numpoints=1)})
-        plt.ylabel('Cross Validated Accuracy Score')
-        plt.xlabel('Number of Neurons')
-        plt.show()
-        ##### NEED TO CREATE OPTIMAL MODEL#####
-    
         
-    #optimal_num_of_neurons_NeuralNetwork_C()
+        
+        
+        neurons=np.linspace(10, 15, 5)
+        #neurons=np.linspace(10,50,40)
+        #Toggle between range of neurons variable for increased accuracy at
+        # the cost of longer processing time
+        neurons=neurons.astype(int)
+        
+        optimal_neurons=[]
+        #for j in range(0,31):
+        #Toggle between range of the for loops for increased accuracy at
+        # the cost of longer processing time
+        for j in range(0,4):
+            cross_Vals=[]
+            from sklearn.neural_network import MLPClassifier
+            for i in neurons:
+                hidden_layers=[i,i,i]  # define the layers/depth of the NN
+                mlp = MLPClassifier(hidden_layer_sizes=hidden_layers, verbose=True)
+                mlp.fit(X_training, y_training)  # fit features over NN
+                
+                #Obtain cross_val_score for K Nearest Neighbours classifier with n_neighbors=i
+                crossvals=cross_val_score(mlp, X_training, y_training, cv=5,scoring='accuracy')
+                #Appending the mean score to the scores list
+                cross_Vals.append(crossvals.mean())
+                
+            #Finding highest Cross Validated Accuracy Score
+            maxCVAS = np.amax(cross_Vals)
+            #Finding relevant index where the highest Cross Validated Score is present
+            result = np.where(cross_Vals == np.amax(cross_Vals))
+            #Retriving the optimal_depth value by indexing the above index found above
+            #on max_depths 
+            
+            optimal_neuron=neurons[result]
+            print(optimal_neuron[0])
+            
+            #Creating the classifier with above said hyper parameter
+            optimal_hidden_layers=[optimal_neuron[0],optimal_neuron[0],optimal_neuron[0]]
+            mlp_optimal = MLPClassifier(hidden_layer_sizes=optimal_hidden_layers,verbose=True)
+            #Building the classifier from the training data sets
+            mlp_optimal.fit(X_training,y_training)
+            #optimal_crossvals=cross_val_score(dt_optimal, X_training, y_training, cv=5,scoring='accuracy')
+            #Predicting the class for X
+            y_pred_optimal=mlp_optimal.predict(X_test) 
+            print('This is test model number:',(j+1))
+            print('The maximum value of CVAS of this test is is:',maxCVAS)
+            print('Optimal # neurons in the hidden layers of this test is:',optimal_neuron[0])
+            #print('Optimal Cross Val of this is:',(optimal_crossvals.mean()))
+            #Finding accuracy
+            print ("Accuracy is", accuracy_score(y_test,y_pred_optimal)*100)
+            print('----------------------------------------------')
+            
+            #Optimal depth in each test is found and added to a list
+            optimal_neurons.append(optimal_neuron[0])
+            
+        print("Evaluvating the optimized model")
+        print(optimal_neurons)
+        #The max_depth that was most frequent in our tests was selected as the final
+        # value of max depth
+        mode_optimal_neurons=stats.mode(optimal_neurons)[0][0]
+        print("The mode of the optimal_neurons list is",mode_optimal_neurons)
+        #Final classifier will be made with the depth that was found to be optimal in most 
+        # of our tests
+        final_optimal_hidden_layers=[mode_optimal_neurons,mode_optimal_neurons,mode_optimal_neurons]
+        mlp_final = MLPClassifier(hidden_layer_sizes=final_optimal_hidden_layers)
+        #Building final classifier
+        mlp_final.fit(X_training,y_training)
+        #Testing final model
+        y_pred_final=mlp_final.predict(X_test)
+        print("Accuracy of the final model is:",accuracy_score(y_test, y_pred_final))
+        print('----------------------------------------------')
+        
+        return mlp_final;
+            
+    
     
     def optimal_Cparam_SVM():
-        C_list=[0.01,0.1,1,10]
-        cross_Vals=[]
-        from sklearn import svm
-        for i in C_list:
-            clf = svm.SVC(C=i,gamma='scale')
-            clf.fit(X_training, y_training)  # fit features over NN
+        C_list=np.array([0.01,0.1,1,10,100,1000])
+        optimal_Cs=[]
+        
+        for j in range(0,30):
+            cross_Vals=[]
+            for i in C_list:
+                clf = svm.SVC(C=i,gamma='scale')
+                clf.fit(X_training, y_training)  # fit features over NN
+                #Obtain cross_val_score for K Nearest Neighbours classifier with n_neighbors=i
+                crossvals=cross_val_score(clf, X_training, y_training, cv=5,scoring='accuracy')
+                #Appending the mean score to the scores list
+                cross_Vals.append(crossvals.mean())
             
-             #Obtain cross_val_score for K Nearest Neighbours classifier with n_neighbors=i
-            crossvals=cross_val_score(clf, X_training, y_training, cv=5,scoring='accuracy')
-            #Appending the mean score to the scores list
-            cross_Vals.append(crossvals.mean())
+            #Finding highest Cross Validated Accuracy Score
+            maxCVAS = np.amax(cross_Vals)
+            #Finding relevant index where the highest Cross Validated Score is present
+            result = np.where(cross_Vals == np.amax(cross_Vals))
+            #Retriving the optimal_depth value by indexing the above index found above
+            #on max_neighbours 
+            optimal_C=C_list[result]
+            print(optimal_C[0])
             
-        #Plotting the the mean cross valuation score as tree depth changes
-        line5,= plt.plot(C_list,cross_Vals,'c',label='Mean Cross Val Score')
-        plt.legend(handler_map={line5: HandlerLine2D(numpoints=1)})
-        plt.ylabel('Cross Validated Accuracy Score')
-        plt.xlabel('C')
-        plt.show()
-            ##### NEED TO CREATE OPTIMAL MODEL#####
-        #We decicde that the optimal hyper parameter for this instance is n_neighbors=8
-        #Creating the classifier with above said hyper parameter
-        svm_optimal = svm.SVC(C=10,gamma='scale')
-        #Building the classifier from the training data sets
-        svm_optimal.fit(X_training,y_training)
-        #should I use X_test or X_validation?????
-        #Predicting the class for X
-        y_pred_optimal=svm_optimal.predict(X_validation)
-        #Computing the accuracy score by comparing the predicted set
-        #with the validation set
-        print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
-
+            #Creating the classifier with above said hyper parameter
+            clf_optimal = svm.SVC(C=optimal_C,gamma='scale')
+            #Building the classifier from the training data sets
+            clf_optimal.fit(X_training,y_training)
+            #optimal_crossvals=cross_val_score(dt_optimal, X_training, y_training, cv=5,scoring='accuracy')
+            #Predicting the class for X
+            y_pred_optimal=clf_optimal.predict(X_test) 
+            print('This is test model number:',(j+1))
+            print('The maximum value of CVAS of this test is is:',maxCVAS)
+            print('Optimal Depth of this test is:',optimal_C[0])
+            #print('Optimal Cross Val of this is:',(optimal_crossvals.mean()))
+            #Finding accuracy
+            print ("Accuracy is", accuracy_score(y_test,y_pred_optimal)*100)
+            print('----------------------------------------------')
+            
+            #Optimal depth in each test is found and added to a list
+            optimal_Cs.append(optimal_C[0])
+            
+        print("Evaluvating the optimized model")
+        print("List of optimal C values found",optimal_Cs)
+        #The max_depth that was most frequent in our tests was selected as the final
+        # value of max depth
+        mode_optimal_Cs=stats.mode(optimal_Cs)[0][0]
+        print("The mode of the optimal_Cs list is",mode_optimal_Cs)
+        #Final classifier will be made with the depth that was found to be optimal in most 
+        # of our tests
+        clf_final = svm.SVC(C=mode_optimal_Cs,gamma='scale')
+        #Building final classifier
+        clf_final.fit(X_training,y_training)
+        #Testing final model
+        y_pred_final=clf_final.predict(X_test)
+        print("Accuracy of the final model is:",accuracy_score(y_test, y_pred_final))
+        print('----------------------------------------------')
+    
+    #optimal_Max_depth_DT()
+    optimal_num_of_neighbours_NNC()
     #optimal_Cparam_SVM()
+    #optimal_num_of_neurons_NeuralNetwork_C()
     
-    
-    #### SCALING??????
-    #### CROSS VALIDATION DONE RIGHT?
-    #### IS AUC REALLY NECCESSARY?
-    #### 
             
 
         
