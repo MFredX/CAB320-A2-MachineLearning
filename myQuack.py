@@ -309,7 +309,7 @@ if __name__ == "__main__":
         print ("Accuracy is", accuracy_score(y_validation,y_pred_optimal)*100)
         return dt_optimal
     
-    optimal_Max_branch_DT()
+    #optimal_Max_branch_DT()
     
     def optimal_num_of_neighbours_NNC():
         '''  
@@ -429,7 +429,7 @@ if __name__ == "__main__":
         print ("Accuracy of the optimised NNC is", accuracy_score(y_validation,y_pred_optimal)*100)
         return nn_optimal
     
-    #optimal_num_of_neighbours_NNC()
+    optimal_num_of_neighbours_NNC()
     
     def optimal_num_of_neurons_NeuralNetwork_C():
         neurons=np.linspace(10, 40, 30)
