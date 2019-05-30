@@ -171,13 +171,15 @@ if __name__ == "__main__":
     ratio_train, ratio_test = 0.8 , 0.2
     
     #Creating the training data set 80% of the data
-    X_training, X_testandVal, y_training, y_testandVal = train_test_split(X, y, train_size=ratio_train,test_size=ratio_test, shuffle=True,random_state=7654)
+    X_training, X_test, y_training, y_test = train_test_split(X, y, train_size=ratio_train,test_size=ratio_test, shuffle=True,random_state=7654)
     
-    #The validation and testing sets are created 
-    #from th remaining 20% by splitting that in to two 10% parts
-    test_ratio=0.5
-    X_validation,X_test,y_validation,y_test=train_test_split(X_testandVal,y_testandVal,test_size=test_ratio,shuffle=True,random_state=7654)
-    
+# =============================================================================
+#     #The validation and testing sets are created 
+#     #from th remaining 20% by splitting that in to two 10% parts
+#     test_ratio=0.5
+#     X_validation,X_test,y_validation,y_test=train_test_split(X_testandVal,y_testandVal,test_size=test_ratio,shuffle=True,random_state=7654)
+#     
+# =============================================================================
     def optimal_Max_branch_DT():
         '''  
         Plots graphs and demonstrates the nature in which the optimal value of
@@ -193,33 +195,9 @@ if __name__ == "__main__":
         @return
         	clf : the classifier with the optimal max_branch hyper-parameter
         '''
-    
-        # call your functions here
-        #clf=build_DecisionTree_classifier(X_training, y_training)
-        #Predict the response for test dataset
 
-        
-        #print(cross_val_score(clf, X_training, y_training, cv=3, scoring="accuracy"))
-        
-        #Tuning the max_depth hyper parameter for the decision tree classifier
-        #The area under the curve will be used as a metric since this is a binary
-        #classification problem
-        
-        
-
-        
-        #Creating an array of max_depths to loop through to find
-        #optimal hyper parameter
         max_depths = np.linspace(1, 30, 30)
-        
-        training_results = []
-        testing_results = []
-        testing_meanScoreresults = []
-        training_meanScoreresults = []
         cross_Vals=[]
-        
-        
-        
         
         #Iterating through max_depths array to find the optimal value of max_depth
         for i in max_depths:
@@ -227,66 +205,7 @@ if __name__ == "__main__":
             #Building the classifier from the training data sets
             dt.fit(X_training, y_training)
             
-            #Predicting the response of training data set
-            train_pred = dt.predict(X_training)
             
-            #A Reciever Operating Characteristic Curve is computed
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(y_true=y_training,y_score=train_pred)
-            
-            #Area under the Reciever Operating Characteristic Curve is computed from the
-            #prediction scores
-            roc_auc = auc(false_positive_rate, true_positive_rate)
-            
-            # Add auc score to previous train results
-            training_results.append(roc_auc)
-            
-            #Predicting the response of the test data set
-            y_pred = dt.predict(X_test)
-            
-             #A Reciever Operating Characteristic Curve is computed from the result of 
-             #
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
-            
-            #Area under the Reciever Operating Characteristic Curve is computed from the
-            #prediction scores
-            roc_auc = auc(false_positive_rate, true_positive_rate)
-            # Add auc score to previous test results
-            testing_results.append(roc_auc)
-            
-            #Getting Mean Score Results for Training
-            #This is the mean accuracy on the given test data and labels
-            #Training data and Training labels
-            l=dt.score(X_training, y_training)
-            training_meanScoreresults.append(l)
-            
-            #Getting Mean Score Results for Testing
-            #This is the mean accuracy on the given training data and labels
-            #Testing data and Testing labels
-            s=dt.score(X_test, y_test)
-            testing_meanScoreresults.append(s)
-            
-            #Obtain cross_val_score for DecisionTree classifier with max_depth=i
-            crossvals=cross_val_score(dt, X_training, y_training, cv=5,scoring='accuracy')
-            #Appending the mean score to the scores list
-            cross_Vals.append(crossvals.mean())
-            
-        
-        
-        #Plotting the the respective areas under the curve
-        line1, = plt.plot(max_depths, training_results, 'b', label='Train AUC')
-        line2, = plt.plot(max_depths, testing_results, 'r', label='Test AUC')
-        plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
-        plt.ylabel('Score')
-        plt.xlabel('Tree depth')
-        plt.show()
-        
-        #Plotting the the respective mean score results
-        line3, = plt.plot(max_depths, testing_meanScoreresults, 'g', label='Testing Mean Score Results')
-        line4, = plt.plot(max_depths, training_meanScoreresults, 'y', label='Training Mean Score Results')
-        plt.legend(handler_map={line3: HandlerLine2D(numpoints=2)})
-        plt.ylabel('Mean Accuracy Score')
-        plt.xlabel('Tree depth')
-        plt.show()
         
         #Plotting the the mean cross valuation score as tree depth changes
         line5,= plt.plot(max_depths,cross_Vals,'c',label='Mean Cross Val Score')
@@ -295,18 +214,27 @@ if __name__ == "__main__":
         plt.xlabel('Tree depth')
         plt.show()
         
-        
+        #Finding highest Cross Validated Accuracy Score
+        maxCVAS = np.amax(cross_Vals)
+        result = np.where(cross_Vals == np.amax(cross_Vals))
+        optimal_depth=max_depths[result]
+        print('The maximum value of CVAS is',maxCVAS)
+        print('Returned tuple of arrays :', result)
+        print('List of Indices of maximum element :', result[0])
+        print('Optimal Depth is',optimal_depth)
         #We decicde that the optimal hyper parameter for this instance is max_depth=5
         #Creating the classifier with above said hyper parameter
-        dt_optimal = DecisionTreeClassifier(max_depth=5)
+        dt_optimal = DecisionTreeClassifier(max_depth=optimal_depth)
         #Building the classifier from the training data sets
         dt_optimal.fit(X_training,y_training)
+        optimal_crossvals=cross_val_score(dt_optimal, X_training, y_training, cv=5,scoring='accuracy')
         #should I use X_test or X_validation?????
         #Predicting the class for X
-        y_pred_optimal=dt_optimal.predict(X_validation)
+        y_pred_optimal=dt_optimal.predict(X_test) #USE TEST SET
         #Computing the accuracy score by comparing the predicted set
         #with the validation set
-        print ("Accuracy is", accuracy_score(y_validation,y_pred_optimal)*100)
+        print ("Accuracy is", accuracy_score(y_test,y_pred_optimal)*100)
+        print("Optimal Cross Val score is",optimal_crossvals)
         return dt_optimal
     
     optimal_Max_branch_DT()
@@ -337,8 +265,6 @@ if __name__ == "__main__":
         #optimal hyper parameter
         max_neighbours=np.linspace(1, 30, 30)
         max_neighbours=max_neighbours.astype(int)
-        training_results = []
-        testing_results = []
         testing_meanScoreresults = []
         training_meanScoreresults = []
         cross_Vals=[]
@@ -347,32 +273,6 @@ if __name__ == "__main__":
             nn=KNeighborsClassifier(n_neighbors=i)
             #Building the classifier from the training data sets
             nn.fit(X_training, y_training)
-            
-            #Predicting the response of training data set
-            train_pred = nn.predict(X_training)
-            
-            #A Reciever Operating Characteristic Curve is computed
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(y_true=y_training,y_score=train_pred)
-            
-            #Area under the Reciever Operating Characteristic Curve is computed from the
-            #prediction scores
-            roc_auc = auc(false_positive_rate, true_positive_rate)
-            
-            # Add auc score to previous train results
-            training_results.append(roc_auc)
-            
-            #Predicting the response of the test data set
-            y_pred = nn.predict(X_test)
-            
-             #A Reciever Operating Characteristic Curve is computed from the result of 
-             #
-            false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
-            
-            #Area under the Reciever Operating Characteristic Curve is computed from the
-            #prediction scores
-            roc_auc = auc(false_positive_rate, true_positive_rate)
-            # Add auc score to previous test results
-            testing_results.append(roc_auc)
 
             #Getting Mean Score Results for Training
             #This is the mean accuracy on the given test data and labels
@@ -390,15 +290,6 @@ if __name__ == "__main__":
             crossvals=cross_val_score(nn, X_training, y_training, cv=5,scoring='accuracy')
             #Appending the mean score to the scores list
             cross_Vals.append(crossvals.mean())
-            
-            
-        #Plotting the the respective areas under the curve
-        line1, = plt.plot(max_neighbours, training_results, 'b', label='Train AUC')
-        line2, = plt.plot(max_neighbours, testing_results, 'r', label='Test AUC')
-        plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
-        plt.ylabel('Score')
-        plt.xlabel('Number of Neighbours')
-        plt.show()
 
         #Plotting the the respective mean score results
         line3, = plt.plot(max_neighbours, testing_meanScoreresults, 'g', label='Testing Mean Score Results')
